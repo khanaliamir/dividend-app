@@ -200,4 +200,17 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
             with st.expander(f"View exact historical dates when Buy-the-Dip triggered ({price_mode})"):
                 if len(dip_log_dates) > 0:
                     log_df = pd.DataFrame({
-"Execution Date (Monthly Payday)": dip_log_dates,f"Stock Entry Price ({currency})": [f"{p:,.2f}" for p in dip_log_prices],"Action Status": ["Extra Cash Deployed Successfully"] * len(dip_log_dates)})st.dataframe(log_df, use_container_width=True)log_csv = log_df.to_csv(index=False).encode('utf-8')st.download_button(label="📥 Download Tactical Dip Logs as CSV",data=log_csv,file_name=f"{ticker}_tactical_dips.csv",mime="text/csv")else:st.write("No dips matched your exact criteria during this timeline window.")
+"Execution Date (Monthly Payday)": dip_log_dates,
+                        f"Stock Entry Price ({currency})": [f"{p:,.2f}" for p in dip_log_prices],
+                        "Action Status": ["Extra Cash Deployed Successfully"] * len(dip_log_dates)
+                    })
+                    st.dataframe(log_df, use_container_width=True)
+                    log_csv = log_df.to_csv(index=False).encode('utf-8')
+                    st.download_button
+                    (label="📥 Download Tactical Dip Logs as CSV",
+                    data=log_csv,
+                    file_name=f"{ticker}_tactical_dips.csv",
+                    mime="text/csv"
+                    )
+                else:
+                    st.write("No dips matched your exact criteria during this timeline window.")
