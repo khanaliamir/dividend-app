@@ -11,7 +11,7 @@ st.markdown("### Optimized for Salaried Investors: Monthly regular SIP + Max 1 D
 # 2. Sidebar Control Panel for User Input
 st.sidebar.header("⚙️ Strategy Parameters")
 
-# NEW: Pre-mapped dictionary of popular high-yield dividend stocks
+# Pre-mapped dictionary of popular high-yield dividend stocks
 ticker_dict = {
     "Coal India Ltd. (NSE)": "COALINDIA.NS",
     "Hindustan Zinc Ltd. (NSE)": "HINDZINC.NS",
@@ -26,10 +26,8 @@ ticker_dict = {
     "🔍 Enter a Custom Ticker...": "CUSTOM"
 }
 
-# User selects a friendly name instead of typing codes
 selected_display = st.sidebar.selectbox("Choose a Stock / Company", options=list(ticker_dict.keys()))
 
-# If the user selects the custom option, show a hidden text box to let them type manually
 if selected_display == "🔍 Enter a Custom Ticker...":
     ticker = st.sidebar.text_input("Type Global Ticker Symbol (e.g., Reliance is RELIANCE.NS)", value="RELIANCE.NS").strip()
 else:
@@ -50,7 +48,6 @@ monthly_sip = st.sidebar.number_input(f"Regular Monthly SIP Amount ({currency})"
 dip_trigger = st.sidebar.slider("Dip Target (% below 52W High)", 1, 20, 5) / 100
 dip_buy_amt = st.sidebar.number_input(f"Extra Monthly Cash Input on Dip ({currency})", value=5000, step=500)
 
-# Strategy Choice Toggles
 st.sidebar.markdown("---")
 st.sidebar.header("🔄 Strategy Configuration")
 drip_enabled = st.sidebar.toggle("Reinvest Dividends (DRIP Mode)", value=False)
@@ -67,7 +64,7 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
         stock = yf.Ticker(ticker)
         
         auto_adjust_setting = True if price_mode == "Corporate Adjusted Prices" else False
-        df = stock.history(start=f"{start_year}-01-01", end=f"{end_year}-05-22", actions=True, auto_adjust=auto_adjust_setting)
+        df = stock.history(start=f"{start_year}-01-01", end=f"{end_year}-12-31", actions=True, auto_adjust=auto_adjust_setting)
         
         if df.empty:
             st.error("Error fetching data. Please ensure the ticker format is correct.")
@@ -84,7 +81,6 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
             history_wealth = []
             history_investment = []
             
-            # Dictionary structures to accumulate dividends and share counts by calendar year
             annual_dividend_tracker = {}
             annual_shares_tracker = {}
             
@@ -95,11 +91,9 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
                 current_price = row['Close']
                 current_year = date.year
                 
-                # Initialize tracking containers for new years seamlessly
                 if current_year not in annual_dividend_tracker:
                     annual_dividend_tracker[current_year] = 0.0
                 
-                # EXECUTION DAY: Only evaluate actions on the 1st trading day of the month
                 if date in monthly_markers:
                     shares_held += (monthly_sip / current_price)
                     total_invested += monthly_sip
@@ -112,7 +106,6 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
                         dip_log_dates.append(date.strftime('%Y-%m-%d'))
                         dip_log_prices.append(current_price)
                 
-                # Dividend payout distribution tracking
                 if 'Dividends' in row and row['Dividends'] > 0:
                     cash_received = shares_held * row['Dividends']
                     total_dividends_collected += cash_received
@@ -121,7 +114,6 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
                     if drip_enabled:
                         shares_held += (cash_received / current_price)
                     
-                # Store structural closing share value counts for each year
                 annual_shares_tracker[current_year] = shares_held
                 
                 history_dates.append(date)
@@ -182,8 +174,8 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
             annual_df = pd.DataFrame({
                 "Calendar Year": years_list,
                 "Shares Held at Year End": [f"{annual_shares_tracker[y]:,.2f}" for y in years_list],
-                f"Total Cash Dividends Received ({currency})": [f"{annual_dividend_tracker[y]:.2f}" for y in years_list],
-                "Estimated Monthly Avg Income": [f"{(annual_dividend_tracker[y]/12):.2f}" for y in years_list]
+                f"Total Cash Dividends Received ({currency})": [f"{annual_dividend_tracker[y]:,.2f}" for y in years_list],
+                "Estimated Monthly Avg Income": [f"{(annual_dividend_tracker[y]/12):,.2f}" for y in years_list]
             })
             st.dataframe(annual_df, use_container_width=True, hide_index=True)
             
@@ -200,17 +192,19 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
             with st.expander(f"View exact historical dates when Buy-the-Dip triggered ({price_mode})"):
                 if len(dip_log_dates) > 0:
                     log_df = pd.DataFrame({
-"Execution Date (Monthly Payday)": dip_log_dates,
+                        "Execution Date (Monthly Payday)": dip_log_dates,
                         f"Stock Entry Price ({currency})": [f"{p:,.2f}" for p in dip_log_prices],
                         "Action Status": ["Extra Cash Deployed Successfully"] * len(dip_log_dates)
                     })
                     st.dataframe(log_df, use_container_width=True)
+                    
                     log_csv = log_df.to_csv(index=False).encode('utf-8')
-                    st.download_button
-                    (label="📥 Download Tactical Dip Logs as CSV",
-                    data=log_csv,
+                    st.download_button(
+                        label="📥 Download Tactical Dip Logs as CSV",
+data=log_csv,
                     file_name=f"{ticker}_tactical_dips.csv",
                     mime="text/csv"
                     )
-                else:
+                    else:
                     st.write("No dips matched your exact criteria during this timeline window.")
+                
