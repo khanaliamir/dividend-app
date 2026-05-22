@@ -10,7 +10,31 @@ st.markdown("### Optimized for Salaried Investors: Monthly regular SIP + Max 1 D
 
 # 2. Sidebar Control Panel for User Input
 st.sidebar.header("⚙️ Strategy Parameters")
-ticker = st.sidebar.text_input("Stock Ticker (e.g., COALINDIA.NS, AAPL, O)", value="COALINDIA.NS")
+
+# NEW: Pre-mapped dictionary of popular high-yield dividend stocks
+ticker_dict = {
+    "Coal India Ltd. (NSE)": "COALINDIA.NS",
+    "Hindustan Zinc Ltd. (NSE)": "HINDZINC.NS",
+    "ITC Ltd. (NSE)": "ITC.NS",
+    "TCS Ltd. (NSE)": "TCS.NS",
+    "Infosys Ltd. (NSE)": "INFY.NS",
+    "REC Ltd. (NSE)": "REC.NS",
+    "PFC Ltd. (NSE)": "PFC.NS",
+    "Realty Income - Monthly Dividend (US)": "O",
+    "Apple Inc. (US)": "AAPL",
+    "Microsoft Corp. (US)": "MSFT",
+    "🔍 Enter a Custom Ticker...": "CUSTOM"
+}
+
+# User selects a friendly name instead of typing codes
+selected_display = st.sidebar.selectbox("Choose a Stock / Company", options=list(ticker_dict.keys()))
+
+# If the user selects the custom option, show a hidden text box to let them type manually
+if selected_display == "🔍 Enter a Custom Ticker...":
+    ticker = st.sidebar.text_input("Type Global Ticker Symbol (e.g., Reliance is RELIANCE.NS)", value="RELIANCE.NS").strip()
+else:
+    ticker = ticker_dict[selected_display]
+
 start_year = st.sidebar.slider("Start Year", 2000, 2026, 2011)
 end_year = st.sidebar.slider("End Year", 2001, 2026, 2026)
 
@@ -163,7 +187,6 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
             })
             st.dataframe(annual_df, use_container_width=True, hide_index=True)
             
-            # NEW: Download button for Annual Data
             annual_csv = annual_df.to_csv(index=False).encode('utf-8')
             st.download_button(
                 label="📥 Download Annual Data as CSV",
@@ -177,18 +200,4 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
             with st.expander(f"View exact historical dates when Buy-the-Dip triggered ({price_mode})"):
                 if len(dip_log_dates) > 0:
                     log_df = pd.DataFrame({
-                        "Execution Date (Monthly Payday)": dip_log_dates,
-                        f"Stock Entry Price ({currency})": [f"{p:,.2f}" for p in dip_log_prices],
-                        "Action Status": ["Extra Cash Deployed Successfully"] * len(dip_log_dates)
-                    })
-                    st.dataframe(log_df, use_container_width=True)
-                    
-                    # NEW: Download button for Tactical Dip Log
-                    log_csv = log_df.to_csv(index=False).encode('utf-8')
-                    st.download_button(
-                        label="📥 Download Tactical Dip Logs as CSV",
-                        data=log_csv,
-                        file_name=f"{ticker}_tactical_dips.csv",
-                        mime="text/csv"
-                    )
-                else: st.write("No dips matched your exact criteria during this timeline window.")
+"Execution Date (Monthly Payday)": dip_log_dates,f"Stock Entry Price ({currency})": [f"{p:,.2f}" for p in dip_log_prices],"Action Status": ["Extra Cash Deployed Successfully"] * len(dip_log_dates)})st.dataframe(log_df, use_container_width=True)log_csv = log_df.to_csv(index=False).encode('utf-8')st.download_button(label="📥 Download Tactical Dip Logs as CSV",data=log_csv,file_name=f"{ticker}_tactical_dips.csv",mime="text/csv")else:st.write("No dips matched your exact criteria during this timeline window.")
