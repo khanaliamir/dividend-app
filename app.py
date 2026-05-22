@@ -20,7 +20,7 @@ if ".NS" not in ticker.upper() and ".BO" not in ticker.upper():
     if ".L" in ticker.upper():
         currency = "£"
     else:
-        currency = "$"
+        currency = "\$"
 
 monthly_sip = st.sidebar.number_input(f"Regular Monthly SIP Amount ({currency})", value=10000, step=1000)
 dip_trigger = st.sidebar.slider("Dip Target (% below 52W High)", 1, 20, 5) / 100
@@ -92,7 +92,7 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
                 if 'Dividends' in row and row['Dividends'] > 0:
                     cash_received = shares_held * row['Dividends']
                     total_dividends_collected += cash_received
-                    annual_dividend_tracker[current_year] += cash_received # Log to specific calendar year
+                    annual_dividend_tracker[current_year] += cash_received 
                     
                     if drip_enabled:
                         shares_held += (cash_received / current_price)
@@ -151,17 +151,26 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
             fig.update_layout(title=f"Salaried Growth Timeline ({price_mode})", xaxis_title="Timeline", yaxis_title=f"Value ({currency})", legend=dict(x=0.01, y=0.99))
             st.plotly_chart(fig, use_container_width=True)
             
-            # 7. NEW: Annual Dividend Breakdown Ledger
+            # 7. Annual Dividend Breakdown Ledger
             st.markdown("### 📅 Annual Income Progression Ledger")
             years_list = sorted(list(annual_dividend_tracker.keys()))
             
             annual_df = pd.DataFrame({
                 "Calendar Year": years_list,
                 "Shares Held at Year End": [f"{annual_shares_tracker[y]:,.2f}" for y in years_list],
-                f"Total Cash Dividends Received ({currency})": [f"{currency}{annual_dividend_tracker[y]:,.2f}" for y in years_list],
-                "Estimated Monthly Avg Income": [f"{currency}{(annual_dividend_tracker[y]/12):,.2f}" for y in years_list]
+                f"Total Cash Dividends Received ({currency})": [f"{annual_dividend_tracker[y]:.2f}" for y in years_list],
+                "Estimated Monthly Avg Income": [f"{(annual_dividend_tracker[y]/12):.2f}" for y in years_list]
             })
             st.dataframe(annual_df, use_container_width=True, hide_index=True)
+            
+            # NEW: Download button for Annual Data
+            annual_csv = annual_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                label="📥 Download Annual Data as CSV",
+                data=annual_csv,
+                file_name=f"{ticker}_annual_progression.csv",
+                mime="text/csv"
+            )
             
             # 8. Historical Purchase Ledger Dropdown Table
             st.markdown("### 📜 Tactical Action Logs")
@@ -173,6 +182,13 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
                         "Action Status": ["Extra Cash Deployed Successfully"] * len(dip_log_dates)
                     })
                     st.dataframe(log_df, use_container_width=True)
+                    
+                    # NEW: Download button for Tactical Dip Log
+                    log_csv = log_df.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="📥 Download Tactical Dip Logs as CSV",
+                        data=log_csv,
+                        file_name=f"{ticker}_tactical_dips.csv",
+                        mime="text/csv"
+                    )
                 else:
-                    st.write("No dips matched your exact criteria during this timeline window.")
-
