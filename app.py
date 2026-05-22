@@ -191,4 +191,4 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
                         file_name=f"{ticker}_tactical_dips.csv",
                         mime="text/csv"
                     )
-                else:
+                else: st.write("No dips matched your exact criteria during this timeline window.")
