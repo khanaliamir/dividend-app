@@ -205,6 +205,5 @@ data=log_csv,
                     file_name=f"{ticker}_tactical_dips.csv",
                     mime="text/csv"
                     )
-                    else:
-                    st.write("No dips matched your exact criteria during this timeline window.")
-                
+                    else: st.write("No dips matched your exact criteria during this timeline window.")
+                        
