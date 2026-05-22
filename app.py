@@ -42,7 +42,7 @@ if ".NS" not in ticker.upper() and ".BO" not in ticker.upper():
     if ".L" in ticker.upper():
         currency = "£"
     else:
-        currency = "\$"
+        currency = "$"
 
 monthly_sip = st.sidebar.number_input(f"Regular Monthly SIP Amount ({currency})", value=10000, step=1000)
 dip_trigger = st.sidebar.slider("Dip Target (% below 52W High)", 1, 20, 5) / 100
@@ -105,7 +105,6 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
                         
                         dip_log_dates.append(date.strftime('%Y-%m-%d'))
                         dip_log_prices.append(current_price)
-                
                 if 'Dividends' in row and row['Dividends'] > 0:
                     cash_received = shares_held * row['Dividends']
                     total_dividends_collected += cash_received
@@ -201,9 +200,9 @@ if st.sidebar.button("🚀 Run Backtest Engine"):
                     log_csv = log_df.to_csv(index=False).encode('utf-8')
                     st.download_button(
                         label="📥 Download Tactical Dip Logs as CSV",
-data=log_csv,
-                    file_name=f"{ticker}_tactical_dips.csv",
-                    mime="text/csv"
+                        data=log_csv,
+                        file_name=f"{ticker}_tactical_dips.csv",
+                        mime="text/csv"
                     )
-                    else: st.write("No dips matched your exact criteria during this timeline window.")
-                        
+                else:
+                    st.write("No dips matched your exact criteria during this timeline window.")
